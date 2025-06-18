@@ -24,6 +24,9 @@ const eslintConfig = [
       
       // Disable Next.js image optimization warning
       "@next/next/no-img-element": "off",
+      
+      // Disable unescaped entities warning (allows apostrophes, quotes, etc.)
+      "react/no-unescaped-entities": "off",
     },
   },
 ];
