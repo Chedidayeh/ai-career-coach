@@ -6,7 +6,7 @@ import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { dark } from "@clerk/themes";
 import { LinkPreview } from "@/components/ui/link-preview";
-
+import { Analytics } from "@vercel/analytics/next"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             enableSystem
             disableTransitionOnChange
           >
+          <Analytics/>
             <Header />
             <main className="min-h-screen">{children}</main>
             <Toaster richColors />
