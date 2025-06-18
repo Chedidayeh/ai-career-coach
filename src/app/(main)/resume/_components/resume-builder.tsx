@@ -120,7 +120,7 @@ export default function ResumeBuilder({ initialContent } : {initialContent : str
     setIsGenerating(true);
     try {
       // Dynamic import to avoid SSR issues
-      // @ts-ignore
+      // @ts-expect-error
       const html2pdf = (await import('html2pdf.js')).default as any;
       
       const element = document.getElementById("resume-pdf");

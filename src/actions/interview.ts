@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generateQuiz() {
-  const { userId } = await auth();
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
@@ -20,8 +20,9 @@ export async function generateQuiz() {
     },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   const prompt = `
     Generate 10 technical interview questions for a ${
       user.industry
@@ -59,16 +60,17 @@ export async function generateQuiz() {
   }
 }
 
-export async function saveQuizResult(questions : QuizQuestion[], answers : any, score : number) {
-  const { userId } = await auth();
+export async function saveQuizResult(questions : QuizQuestion[], answers : (string | null)[], score : number) {
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   const questionResults = questions.map((q , index : number) => ({
     question: q.question,
     correctAnswer: q.correctAnswer,
@@ -85,8 +87,8 @@ export async function saveQuizResult(questions : QuizQuestion[], answers : any, 
   if (wrongAnswers.length > 0) {
     const wrongQuestionsText = wrongAnswers
       .map(
-        (q : any) =>
-          `Question: "${q.question}"\nCorrect Answer: "${q.answer}"\nUser Answer: "${q.userAnswer}"`
+        (q) =>
+          `Question: "${q.question}"\nCorrect Answer: "${q.correctAnswer}"\nUser Answer: "${q.userAnswer}"`
       )
       .join("\n\n");
 
@@ -131,15 +133,16 @@ export async function saveQuizResult(questions : QuizQuestion[], answers : any, 
 }
 
 export async function getAssessments() {
-  const { userId } = await auth();
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   try {
     const assessments = await db.assessment.findMany({
       where: {

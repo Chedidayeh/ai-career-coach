@@ -24,17 +24,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteCoverLetter } from "@/actions/cover-letter";
+import { CoverLetters } from "@/data/industries";
 
-export default function CoverLetterList({ coverLetters }) {
+export default function CoverLetterList({ coverLetters } : {coverLetters : CoverLetters[]}) {
   const router = useRouter();
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id : string) => {
     try {
       await deleteCoverLetter(id);
       toast.success("Cover letter deleted successfully!");
       router.refresh();
     } catch (error) {
-      toast.error(error.message || "Failed to delete cover letter");
+      toast.error((error as Error)?.message || "Failed to delete cover letter");
     }
   };
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { Industry } from "@/data/industries";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -38,7 +37,7 @@ export const generateAIInsights = async (industry :  string) => {
 };
 
 export async function getIndustryInsights() {
-  const { userId } = await auth();
+  const { userId  , redirectToSignIn} = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
@@ -48,8 +47,9 @@ export async function getIndustryInsights() {
     },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   // If no insights exist, generate them
   if (!user.industryInsight) {
     const insights = await generateAIInsights(user.industry!);

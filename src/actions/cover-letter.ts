@@ -1,13 +1,16 @@
 "use server";
 
+import { coverLetterSchema } from "@/app/lib/schema";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import z from "zod";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-export async function generateCoverLetter(data) {
+
+export async function generateCoverLetter(data : z.infer<typeof coverLetterSchema>) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -60,21 +63,22 @@ export async function generateCoverLetter(data) {
 
     return coverLetter;
   } catch (error) {
-    console.error("Error generating cover letter:", error.message);
+    console.error("Error generating cover letter:", error instanceof Error ? error.message : String(error));
     throw new Error("Failed to generate cover letter");
   }
 }
 
 export async function getCoverLetters() {
-  const { userId } = await auth();
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   return await db.coverLetter.findMany({
     where: {
       userId: user.id,
@@ -85,17 +89,17 @@ export async function getCoverLetters() {
   });
 }
 
-export async function getCoverLetter(id) {
-  const { userId } = await auth();
+export async function getCoverLetter(id : string) {
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
-  return await db.coverLetter.findUnique({
+  if (!user) {
+    return redirectToSignIn();
+  }  return await db.coverLetter.findUnique({
     where: {
       id,
       userId: user.id,
@@ -103,16 +107,17 @@ export async function getCoverLetter(id) {
   });
 }
 
-export async function deleteCoverLetter(id) {
-  const { userId } = await auth();
+export async function deleteCoverLetter(id : string) {
+  const { userId  , redirectToSignIn} = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   return await db.coverLetter.delete({
     where: {
       id,

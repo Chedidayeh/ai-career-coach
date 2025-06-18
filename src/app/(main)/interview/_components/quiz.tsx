@@ -72,8 +72,8 @@ export default function Quiz() {
     try {
       await saveQuizResultFn(quizData, answers, score);
       toast.success("Quiz completed!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save quiz results");
+    } catch (error) {
+      toast.error((error as Error)?.message || "Failed to save quiz results");
     }
   };
 

@@ -21,6 +21,7 @@ import useFetch from "@/hooks/use-fetch";
 import { coverLetterSchema } from "@/app/lib/schema";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 
 export default function CoverLetterGenerator() {
   const router = useRouter();
@@ -49,11 +50,12 @@ export default function CoverLetterGenerator() {
     }
   }, [generatedLetter]);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: z.infer<typeof coverLetterSchema>) => {
     try {
       await generateLetterFn(data);
     } catch (error) {
-      toast.error(error.message || "Failed to generate cover letter");
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate cover letter";
+      toast.error(errorMessage);
     }
   };
 

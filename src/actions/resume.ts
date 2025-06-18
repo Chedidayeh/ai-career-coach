@@ -9,15 +9,16 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function saveResume(content : string) {
-  const { userId } = await auth();
+  const { userId , redirectToSignIn} = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   try {
     const resume = await db.resume.upsert({
       where: {
@@ -41,14 +42,16 @@ export async function saveResume(content : string) {
 }
 
 export async function getResume() {
-  const { userId } = await auth();
+  const { userId ,redirectToSignIn} = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
+  if (!user) {
+    return redirectToSignIn();
+  }
 
   return await db.resume.findUnique({
     where: {
@@ -58,7 +61,7 @@ export async function getResume() {
 }
 
 export async function improveWithAI({ current, type } : { current : string , type : string}) {
-  const { userId } = await auth();
+  const { userId  , redirectToSignIn} = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
@@ -68,8 +71,9 @@ export async function improveWithAI({ current, type } : { current : string , typ
     },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
   const prompt = `
     As an expert resume writer, improve the following ${type} description for a ${user.industry} professional.
     Make it more impactful, quantifiable, and aligned with industry standards.

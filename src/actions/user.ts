@@ -4,17 +4,21 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { generateAIInsights } from "./dashboard";
+import { onboardingSchema } from "@/app/lib/schema";
+import z from "zod";
 
-export async function updateUser(data: any) {
-  const { userId } = await auth();
+export async function updateUser(data: z.infer<typeof onboardingSchema>) {
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    return redirectToSignIn();
+  }
+  
   try {
     // Start a transaction to handle both operations
     const result = await db.$transaction(
@@ -86,14 +90,16 @@ export async function updateUser(data: any) {
 }
 
 export async function getUserOnboardingStatus() {
-  const { userId } = await auth();
+  const { userId , redirectToSignIn } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  if (!user) throw new Error("User not found");
+  if (!user) {
+  return redirectToSignIn();
+}
 
   try {
     const user = await db.user.findUnique({

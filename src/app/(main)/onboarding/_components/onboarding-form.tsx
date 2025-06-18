@@ -30,6 +30,7 @@ import useFetch from "@/hooks/use-fetch";
 import { onboardingSchema } from "@/app/lib/schema";
 import { updateUser } from "@/actions/user";
 import { Industry } from "@/data/industries";
+import z from "zod";
 
 const OnboardingForm = ({ industries } : {industries : Industry[]}) => {
   const router = useRouter();
@@ -51,7 +52,7 @@ const OnboardingForm = ({ industries } : {industries : Industry[]}) => {
     resolver: zodResolver(onboardingSchema),
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof onboardingSchema>) => {
     try {
       const formattedIndustry = `${values.industry}-${values.subIndustry
         .toLowerCase()
@@ -72,7 +73,7 @@ const OnboardingForm = ({ industries } : {industries : Industry[]}) => {
       router.push("/dashboard");
       router.refresh();
     }
-  }, [updateResult, updateLoading]);
+  }, [updateResult, updateLoading , router]);
 
   const watchIndustry = watch("industry");
 

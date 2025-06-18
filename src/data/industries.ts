@@ -1,3 +1,15 @@
+export interface CoverLetters {
+  userId: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  content: string;
+  jobDescription: string | null;
+  companyName: string;
+  jobTitle: string;
+  status: string;
+}
+
 export interface QuizQuestion {
   question: string;
   correctAnswer: string;
