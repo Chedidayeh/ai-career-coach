@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="container mx-auto px-4 text-center text-gray-200">
                 <p>Made with 💗 by Chadi Dayeh</p>
                 <p className="text-xs">Visit my portfolio {"=>"}{" "}
-                  <LinkPreview url="https://tailwindcss.com" className="font-bold">
+                  <LinkPreview url="https://dayeh-chadi-portfolio.vercel.app" className="font-bold">
                     <span className="cursor-pointer">here</span>
                   </LinkPreview>{" "} </p>
 
